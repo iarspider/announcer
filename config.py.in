@@ -1,0 +1,10 @@
+discord_bot_token = ""
+discord_guild_name = ""
+discord_channel_name = ""
+discord_role_name = ""
+
+vk_client_id = ""
+vk_client_secret = ""
+vk_user_id = 0
+vk_group_id = 0
+photo_root = ""
