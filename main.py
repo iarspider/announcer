@@ -182,10 +182,4 @@ def main(*argv):
 
 
 if __name__ == '__main__':
-    main('-m',
-         'Продолжаем историю Повелителя - дойдём ли сегодня до Оберона? Узнаем "после Зига" (тм) на <https://twitch.tv/iarspider>!',
-         '-p', "Overlord_5_0628.jpg")
-#    main('-m',
-#         "Продолжаем копить на улучшения. И покупать их. Stardew Valley сегодня в 19:00 (мск) " +
-#         "на канале <https://twitch.tv/iarspider> !",
-#         '-p', r"SDV_15_0512.jpg")
+    main()
