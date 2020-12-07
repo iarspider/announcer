@@ -9,6 +9,7 @@ verify_ssl = true
 requests = "*"
 discord-py = "*"
 simplejson = "*"
+python-telegram-bot = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

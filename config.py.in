@@ -8,3 +8,5 @@ vk_client_secret = ""
 vk_user_id = 0
 vk_group_id = 0
 photo_root = ""
+telegram_token = ""
+telegram_channel = ""

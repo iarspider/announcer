@@ -9,6 +9,8 @@ from pathlib import Path
 import discord
 import requests
 import simplejson
+import telegram
+from telegram.error import NetworkError, Unauthorized
 
 from config import *
 from enums import VkUserPermissions
@@ -160,6 +162,15 @@ def post_discord(args, photo):
     discord_bot.run(discord_bot_token)
 
 
+def post_telegram(args, photo):
+    print("Creating an announcement in Telegram...")
+    bot = telegram.Bot(telegram_token)
+
+    args.message = args.message.replace('<', '').replace('>', '')
+    print(type(photo))
+    bot.send_photo(telegram_channel, photo.open('rb'), caption=args.message)
+
+
 def main(*argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--message")
@@ -177,9 +188,13 @@ def main(*argv):
 
     post_vk(args, photo)
     post_discord(args, photo)
+    post_telegram(args, photo)
 
     print("All done")
 
 
 if __name__ == '__main__':
-    main()
+    main('-m',
+         "Лето, три полоски на кедах, ... и !НАКАНЕЦТА! краснокочанная капуста! Stardew Valley сегодня в 21:00 мск на <https://twitch.tv/iarspider>!",
+         # 'Меч, магия и голос KLMendor-а за кадром! Очередной стрим по Might&Magic сегодня в 17:00 мск на <https://twitch.tv/iarspider>!',
+         '-p', r"SDV_44_1207.jpg")
