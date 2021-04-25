@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 import argparse
 import asyncio
+import base64
 import datetime
 import sys
 from pathlib import Path
 
-import discord
+import pika
 import requests
 import simplejson
 import telegram
@@ -132,34 +133,49 @@ def post_vk(args, photo):
 
 def post_discord(args, photo):
     print("Creating an announcement in Discord...")
-    discord_bot = discord.Client()
+    
+    body = {'action': 'send', 'message': f'@{discord_role_name} {args.message}', 'channel': discord_channel_name, 'filename': str(photo)}
+                                                 
+    with photo.open('rb') as f:
+        body['attachment'] = base64.b64encode(f.read())
+        
+    connection = pika.BlockingConnection(pika.URLParameters(rabbit_url))
+    channel = connection.channel()
+    channel.queue_declare(queue='discord')
+    channel.basic_publish(exchange='',
+                          routing_key='discord',
+                          body=simplejson.dumps(body))
+    channel.close()
+    connection.close()
 
-    @discord_bot.event
-    async def on_ready():
-        guild: discord.guild = discord.utils.find(lambda g: g.name == discord_guild_name, discord_bot.guilds)
+    # discord_bot = discord.Client()
 
-        if guild is None:
-            raise RuntimeError(f"Failed to join Discord server {discord_guild_name}!")
+    # @discord_bot.event
+    # async def on_ready():
+        # guild: discord.guild = discord.utils.find(lambda g: g.name == discord_guild_name, discord_bot.guilds)
 
-        discord_channel: discord.channel.TextChannel = discord.utils.find(lambda c: c.name == discord_channel_name,
-                                                                          guild.channels)
-        if discord_channel is None:
-            raise RuntimeError(f"Failed to join Discord channel {discord_channel_name}!")
+        # if guild is None:
+            # raise RuntimeError(f"Failed to join Discord server {discord_guild_name}!")
 
-        role: discord.role = discord.utils.find(lambda r: r.name == discord_role_name, guild.roles)
-        if role is None:
-            raise RuntimeError(f"No role {discord_role_name} in server {discord_guild_name}!")
+        # discord_channel: discord.channel.TextChannel = discord.utils.find(lambda c: c.name == discord_channel_name,
+                                                                          # guild.channels)
+        # if discord_channel is None:
+            # raise RuntimeError(f"Failed to join Discord channel {discord_channel_name}!")
 
-        print(f"Ready | {discord_bot.user} @ {guild.name}")
-
-        await discord_channel.send(content=f'<@&{role.id}> {args.message}', file=discord.File(str(photo)))
-        print("Done")
-        print("Shutting down")
-        asyncio.ensure_future(discord_bot.close())
+        # role: discord.role = discord.utils.find(lambda r: r.name == discord_role_name, guild.roles)
+        # if role is None:
+            # raise RuntimeError(f"No role {discord_role_name} in server {discord_guild_name}!")
 
         # print(f"Ready | {discord_bot.user} @ {guild.name}")
 
-    discord_bot.run(discord_bot_token)
+        # await discord_channel.send(content=f'<@&{role.id}> {args.message}', file=discord.File(str(photo)))
+        # print("Done")
+        # print("Shutting down")
+        # asyncio.ensure_future(discord_bot.close())
+
+        # # print(f"Ready | {discord_bot.user} @ {guild.name}")
+
+    # discord_bot.run(discord_bot_token)
 
 
 def post_telegram(args, photo):
@@ -195,6 +211,6 @@ def main(*argv):
 
 if __name__ == '__main__':
     main('-m',
-         "Лето, три полоски на кедах, ... и !НАКАНЕЦТА! краснокочанная капуста! Stardew Valley сегодня в 21:00 мск на <https://twitch.tv/iarspider>!",
-         # 'Меч, магия и голос KLMendor-а за кадром! Очередной стрим по Might&Magic сегодня в 17:00 мск на <https://twitch.tv/iarspider>!',
-         '-p', r"SDV_44_1207.jpg")
+         "Вторая попытка провести второй стрим похождений котика из пряжи - сегодня в 20:00 на <https://twitch.tv/iarspider>! Ну если что - в психушку пойдём, надо Флешке помочь кое-с-чем",
+         #"Меч, магия и голос KLMendor-а за кадром! Очередной стрим по Might&Magic сегодня в 17:00 мск на <https://twitch.tv/iarspider>!',
+         '-p', r"unravel_2_0425.jpg")
